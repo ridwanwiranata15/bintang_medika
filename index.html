@@ -1,494 +1,229 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hospital Management System</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Rumah Sakit</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#41AAB6',  // Warna biru kehijauan
-                        secondary: '#FBAD18', // Warna kuning oranye
-                        danger: '#EF4444',
-                        warning: '#F59E0B',
-                        dark: '#1F2937',
-                    }
-                }
-            }
-        }
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#41AAB5",
+              secondary: "#FBAD18",
+              "primary-dark": "#368C96",
+              "primary-light": "#5AC7D3",
+            },
+          },
+        },
+      };
     </script>
     <style>
-        .sidebar {
-            transition: all 0.3s ease;
-        }
-        .sidebar.collapsed {
-            width: 80px;
-        }
-        .sidebar.collapsed .sidebar-text {
-            display: none;
-        }
-        .sidebar.collapsed .logo-text {
-            display: none;
-        }
-        .sidebar.collapsed .nav-link {
-            justify-content: center;
-        }
-        .main-content {
-            transition: all 0.3s ease;
-        }
-        .sidebar.collapsed + .main-content {
-            margin-left: 80px;
-        }
-        .active-nav {
-            background-color: #E6F4F6; /* Warna yang lebih lembut untuk match primary */
-            color: #41AAB6;
-            border-left: 4px solid #41AAB6;
-        }
-        .active-nav i {
-            color: #41AAB6;
-        }
-        .dropdown-content {
-            display: none;
-            transition: all 0.3s ease;
-        }
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .data-table th, .data-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #E5E7EB;
-        }
-        .data-table th {
-            background-color: #F9FAFB;
-            font-weight: 600;
-            color: #374151;
-        }
-        .data-table tr:hover {
-            background-color: #F3F4F6;
-        }
-        .pagination .active {
-            background-color: #41AAB6;
-            color: white;
-        }
-        .modal {
-            transition: opacity 0.3s ease;
-        }
-        .modal-box {
-            transition: transform 0.3s ease;
-        }
-        
-        /* Custom color classes */
-        .bg-primary-light {
-            background-color: #E6F4F6;
-        }
-        .bg-secondary-light {
-            background-color: #FEF3E2;
-        }
-        .text-primary-dark {
-            color: #2D7E88;
-        }
-        .text-secondary-dark {
-            color: #D18A0B;
-        }
+      .rotate-180 {
+        transform: rotate(180deg);
+      }
+      .transition-transform {
+        transition: transform 0.2s ease-in-out;
+      }
     </style>
-</head>
-<body class="bg-gray-50">
-    <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        <div class="sidebar bg-white shadow-md w-64 fixed h-full z-50">
-            <div class="p-4 flex items-center space-x-2 border-b border-gray-200">
-                <div class="bg-primary p-2 rounded-lg">
-                    <i class="fas fa-hospital text-white text-xl"></i>
-                </div>
-                <span class="logo-text text-xl font-bold text-dark">Bintang medika</span>
-            </div>
-            <div class="p-4">
-                <div class="mb-8">
-                    <div class="flex items-center space-x-3 p-3 rounded-lg bg-primary text-white mb-2">
-                        <i class="fas fa-user-md"></i>
-                        <span class="sidebar-text font-medium">Admin Panel</span>
-                    </div>
-                </div>
-                <nav>
-                    <ul class="space-y-1">
-                        <li>
-                            <a href="#" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 active-nav">
-                                <i class="fas fa-tachometer-alt text-gray-500"></i>
-                                <span class="sidebar-text">Dashboard</span>
-                            </a>
-                        </li>
-                        <li class="dropdown relative">
-                            <a href="#" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
-                                <i class="fas fa-user-md text-gray-500"></i>
-                                <span class="sidebar-text">Doctors</span>
-                                <i class="fas fa-chevron-down text-xs ml-auto"></i>
-                            </a>
-                            <div class="dropdown-content absolute left-0 mt-1 w-full bg-white shadow-lg rounded-md py-1 z-10 hidden">
-                                <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-100">Spesialis</a>
-                                <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-100">Tenaga medis</a>
-                                <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-100">Jadwal kerja</a>
-                                <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-100">Janji temu</a>
-                            </div>
-                        </li>
-                        <li class="dropdown relative">
-                            <a href="#" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
-                                <i class="fas fa-pills text-gray-500"></i>
-                                <span class="sidebar-text">Pharmacists</span>
-                            </a>
-                        </li>
-                        <li class="dropdown relative">
-                            <a href="#" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
-                                <i class="fas fa-blog text-gray-500"></i>
-                                <span class="sidebar-text">Bloggers</span>
-                            </a>
-                            
-                        </li>
-                        <li class="dropdown relative">
-                            <a href="#" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
-                                <i class="fas fa-procedures text-gray-500"></i>
-                                <span class="sidebar-text">Patients</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
-                                <i class="fas fa-calendar-check text-gray-500"></i>
-                                <span class="sidebar-text">Appointments</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
-                                <i class="fas fa-file-medical text-gray-500"></i>
-                                <span class="sidebar-text">Reports</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
-                                <i class="fas fa-cog text-gray-500"></i>
-                                <span class="sidebar-text">Settings</span>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
-                    <i class="fas fa-sign-out-alt text-gray-500"></i>
-                    <span class="sidebar-text">Logout</span>
-                </a>
-            </div>
+  </head>
+  <body class="bg-gray-100">
+    <div class="min-h-screen">
+      <!-- Sidebar -->
+      <div class="bg-primary text-white w-64 fixed h-full">
+        <div class="p-4 flex items-center">
+          <img
+            src="https://via.placeholder.com/40"
+            alt="Logo Rumah Sakit"
+            class="h-10 w-10 rounded-full mr-2"
+          />
+          <h1 class="text-xl font-bold">Rumah Sakit Sehat</h1>
         </div>
+        <nav class="mt-6">
+          <div class="px-4 py-2 hover:bg-primary-dark cursor-pointer">
+            <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+          </div>
 
-        <!-- Main Content -->
-        <div class="main-content flex-1 flex flex-col ml-64">
-            <!-- Top Navigation -->
-            <header class="bg-white shadow-sm py-4 px-6 flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <button id="sidebarToggle" class="text-gray-500 focus:outline-none">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                    <h1 class="text-xl font-semibold text-dark">Dashboard</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="relative">
-                        <button class="text-gray-500 focus:outline-none">
-                            <i class="fas fa-bell text-xl"></i>
-                            <span class="absolute -top-1 -right-1 bg-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
-                        </button>
-                    </div>
-                    <div class="relative">
-                        <button class="text-gray-500 focus:outline-none">
-                            <i class="fas fa-envelope text-xl"></i>
-                            <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">5</span>
-                        </button>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <div class="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold">AD</div>
-                        <span class="text-dark font-medium">Admin</span>
-                    </div>
-                </div>
-            </header>
+          <!-- Menu Dokter dengan Dropdown -->
+          <div class="dropdown-menu">
+            <div
+              class="px-4 py-2 hover:bg-primary-dark cursor-pointer flex justify-between items-center dropdown-toggle"
+              onclick="OpenModalCreate()"
+            >
+              <div><i class="fas fa-user-md mr-2"></i> Dokter</div>
+              <i class="fas fa-chevron-down text-xs transition-transform"></i>
+            </div>
+            <div class="dropdown-content pl-8 hidden" id="dropdown-content">
+              <div class="px-4 py-2 hover:bg-primary-light cursor-pointer">
+                <i class="fas fa-stethoscope mr-2"></i> Spesialis
+              </div>
+              <a href="doctor.html">
+                 <div class="px-4 py-2 hover:bg-primary-light cursor-pointer">
+                <i class="fas fa-user-nurse mr-2"></i> Tenaga Medis
+              </div>
+              </a>
+              <div class="px-4 py-2 hover:bg-primary-light cursor-pointer">
+                <i class="fas fa-calendar-alt mr-2"></i> Jadwal
+              </div>
+              <div class="px-4 py-2 hover:bg-primary-light cursor-pointer">
+                <i class="fas fa-calendar-check mr-2"></i> Janji
+              </div>
+            </div>
+          </div>
 
-            <!-- Content Area -->
-            <main class="flex-1 overflow-y-auto p-6">
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    <div class="bg-white rounded-lg shadow p-6 flex items-center space-x-4">
-                        <div class="bg-primary-light p-3 rounded-full">
-                            <i class="fas fa-user-md text-primary text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-500">Total Doctors</p>
-                            <h3 class="text-2xl font-bold text-dark">48</h3>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-6 flex items-center space-x-4">
-                        <div class="bg-secondary-light p-3 rounded-full">
-                            <i class="fas fa-pills text-secondary text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-500">Total Pharmacists</p>
-                            <h3 class="text-2xl font-bold text-dark">12</h3>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-6 flex items-center space-x-4">
-                        <div class="bg-purple-100 p-3 rounded-full">
-                            <i class="fas fa-blog text-purple-500 text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-500">Total Bloggers</p>
-                            <h3 class="text-2xl font-bold text-dark">8</h3>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-6 flex items-center space-x-4">
-                        <div class="bg-red-100 p-3 rounded-full">
-                            <i class="fas fa-procedures text-danger text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-500">Total Patients</p>
-                            <h3 class="text-2xl font-bold text-dark">1,245</h3>
-                        </div>
-                    </div>
-                </div>
+          <div class="px-4 py-2 hover:bg-primary-dark cursor-pointer">
+            <i class="fas fa-procedures mr-2"></i> Pasien
+          </div>
+          <div class="px-4 py-2 hover:bg-primary-dark cursor-pointer">
+            <i class="fas fa-pills mr-2"></i> Apoteker
+          </div>
+          <div class="px-4 py-2 hover:bg-primary-dark cursor-pointer">
+            <i class="fas fa-blog mr-2"></i> Blog
+          </div>
+        </nav>
+      </div>
 
-                <!-- Recent Activity and Quick Actions -->
-                
-
-                <!-- Data Tables Section -->
-                <!-- <div class="bg-white rounded-lg shadow p-6 mb-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-lg font-semibold text-dark">Doctors List</h2>
-                        <div class="flex space-x-3">
-                            <div class="relative">
-                                <input type="text" placeholder="Search..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                            </div>
-                            <button class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition">
-                                <i class="fas fa-plus"></i>
-                                <span>Add Doctor</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Specialization</th>
-                                    <th>Contact</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>DOC001</td>
-                                    <td>
-                                        <div class="flex items-center space-x-3">
-                                            <div class="h-10 w-10 rounded-full bg-primary-light flex items-center justify-center text-primary font-semibold">JS</div>
-                                            <span>Dr. John Smith</span>
-                                        </div>
-                                    </td>
-                                    <td>Cardiology</td>
-                                    <td>john.smith@example.com</td>
-                                    <td>
-                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span>
-                                    </td>
-                                    <td>
-                                        <div class="flex space-x-2">
-                                            <button class="text-primary hover:text-primary-dark">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="text-danger hover:text-red-600">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                            <button class="text-secondary hover:text-secondary-dark">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>DOC002</td>
-                                    <td>
-                                        <div class="flex items-center space-x-3">
-                                            <div class="h-10 w-10 rounded-full bg-primary-light flex items-center justify-center text-primary font-semibold">MJ</div>
-                                            <span>Dr. Mary Johnson</span>
-                                        </div>
-                                    </td>
-                                    <td>Neurology</td>
-                                    <td>mary.johnson@example.com</td>
-                                    <td>
-                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span>
-                                    </td>
-                                    <td>
-                                        <div class="flex space-x-2">
-                                            <button class="text-primary hover:text-primary-dark">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="text-danger hover:text-red-600">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                            <button class="text-secondary hover:text-secondary-dark">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>DOC003</td>
-                                    <td>
-                                        <div class="flex items-center space-x-3">
-                                            <div class="h-10 w-10 rounded-full bg-primary-light flex items-center justify-center text-primary font-semibold">RW</div>
-                                            <span>Dr. Robert Williams</span>
-                                        </div>
-                                    </td>
-                                    <td>Pediatrics</td>
-                                    <td>robert.williams@example.com</td>
-                                    <td>
-                                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">On Leave</span>
-                                    </td>
-                                    <td>
-                                        <div class="flex space-x-2">
-                                            <button class="text-primary hover:text-primary-dark">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="text-danger hover:text-red-600">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                            <button class="text-secondary hover:text-secondary-dark">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>DOC004</td>
-                                    <td>
-                                        <div class="flex items-center space-x-3">
-                                            <div class="h-10 w-10 rounded-full bg-primary-light flex items-center justify-center text-primary font-semibold">ED</div>
-                                            <span>Dr. Emily Davis</span>
-                                        </div>
-                                    </td>
-                                    <td>Dermatology</td>
-                                    <td>emily.davis@example.com</td>
-                                    <td>
-                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span>
-                                    </td>
-                                    <td>
-                                        <div class="flex space-x-2">
-                                            <button class="text-primary hover:text-primary-dark">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="text-danger hover:text-red-600">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                            <button class="text-secondary hover:text-secondary-dark">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="flex items-center justify-between mt-4">
-                        <div class="text-sm text-gray-500">
-                            Showing 1 to 4 of 48 entries
-                        </div>
-                        <div class="flex space-x-1 pagination">
-                            <button class="px-3 py-1 border rounded-lg hover:bg-gray-100">Previous</button>
-                            <button class="px-3 py-1 border rounded-lg bg-primary text-white">1</button>
-                            <button class="px-3 py-1 border rounded-lg hover:bg-gray-100">2</button>
-                            <button class="px-3 py-1 border rounded-lg hover:bg-gray-100">3</button>
-                            <button class="px-3 py-1 border rounded-lg hover:bg-gray-100">Next</button>
-                        </div>
-                    </div>
-                </div> -->
-        
-            </main>
+      <!-- Main Content -->
+      <div class="ml-64 p-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div
+            class="bg-white rounded-lg shadow p-6 flex items-center space-x-4"
+          >
+            <div class=" p-3 rounded-full">
+              <i class="fas fa-user-md text-primary text-xl"></i>
+            </div>
+            <div>
+              <p class="text-gray-500">Total Doctors</p>
+              <h3 class="text-2xl font-bold text-dark">48</h3>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 flex items-center space-x-4"
+          >
+            <div class="bg-secondary-light p-3 rounded-full">
+              <i class="fas fa-pills text-secondary text-xl"></i>
+            </div>
+            <div>
+              <p class="text-gray-500">Total Pharmacists</p>
+              <h3 class="text-2xl font-bold text-dark">12</h3>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 flex items-center space-x-4"
+          >
+            <div class=" p-3 rounded-full">
+              <i class="fas fa-blog text-purple-500 text-xl"></i>
+            </div>
+            <div>
+              <p class="text-gray-500">Total Bloggers</p>
+              <h3 class="text-2xl font-bold text-dark">8</h3>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 flex items-center space-x-4"
+          >
+            <div class=" p-3 rounded-full">
+              <i class="fas fa-procedures text-danger text-xl"></i>
+            </div>
+            <div>
+              <p class="text-gray-500">Total Patients</p>
+              <h3 class="text-2xl font-bold text-dark">1,245</h3>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
-  
 
-    <script>
-        // Toggle Sidebar
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('collapsed');
-        });
+    <!-- Modal Tambah Dokter -->
+    <div
+      id="doctorModal"
+      class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden"
+    >
+      <div
+        class="bg-white rounded-xl shadow-lg w-full max-w-2xl p-6 relative animate__animated animate__fadeInDown"
+      >
+        <!-- Header -->
+        <div class="flex justify-between items-center border-b pb-3 mb-4">
+          <h3 class="text-2xl font-semibold text-primary flex items-center">
+            <i class="fas fa-user-md mr-2"></i> Tambah Dokter Baru
+          </h3>
+          <button
+            id="closeModalBtn"
+            class="text-gray-400 hover:text-gray-600 text-lg"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
 
-        // Tab functionality
-        const tabButtons = document.querySelectorAll('.tab-button');
-        const tabContents = document.querySelectorAll('.tab-content');
+        <!-- Form -->
+        <form id="doctorForm">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Nama Lengkap</label
+              >
+              <input
+                type="text"
+                placeholder="Contoh: Dr. Siti Aminah"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Spesialis</label
+              >
+              <input
+                type="text"
+                placeholder="Contoh: Anak, Jantung"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Email</label
+              >
+              <input
+                type="email"
+                placeholder="dokter@email.com"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Status</label
+              >
+              <select
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="aktif">Aktif</option>
+                <option value="tidak-aktif">Tidak Aktif</option>
+              </select>
+            </div>
+          </div>
 
-        tabButtons.forEach((button, index) => {
-            button.addEventListener('click', () => {
-                // Remove active class from all buttons and contents
-                tabButtons.forEach(btn => btn.classList.remove('border-primary', 'text-primary'));
-                tabButtons.forEach(btn => btn.classList.add('border-transparent', 'text-gray-500'));
-                tabContents.forEach(content => content.classList.remove('active'));
-                
-                // Add active class to clicked button and corresponding content
-                button.classList.add('border-primary', 'text-primary');
-                button.classList.remove('border-transparent', 'text-gray-500');
-                tabContents[index].classList.add('active');
-            });
-        });
+          <!-- Tombol Simpan -->
+          <div class="mt-6 flex justify-end">
+            <button
+              type="button"
+              id="submitDoctorBtn"
+              class="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-lg shadow-md"
+            >
+              <i class="fas fa-save mr-2"></i> Simpan Dokter
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 
-        // Modal functionality
-        const modal = document.querySelector('.modal');
-        const openModalButtons = document.querySelectorAll('[data-modal-target]');
-        const closeModalButtons = document.querySelectorAll('.close-modal');
-
-        openModalButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                modal.classList.remove('hidden');
-            });
-        });
-
-        closeModalButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                modal.classList.add('hidden');
-            });
-        });
-
-        // Close modal when clicking outside
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.add('hidden');
-            }
-        });
-
-        // Dropdown functionality
-        const dropdowns = document.querySelectorAll('.dropdown');
-        
-        dropdowns.forEach(dropdown => {
-            const button = dropdown.querySelector('a');
-            
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                const content = dropdown.querySelector('.dropdown-content');
-                content.style.display = content.style.display === 'block' ? 'none' : 'block';
-            });
-        });
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.dropdown')) {
-                document.querySelectorAll('.dropdown-content').forEach(content => {
-                    content.style.display = 'none';
-                });
-            }
-        });
-    </script>
-</body>
+    <script src="doctor.js"></script>
+  </body>
 </html>
